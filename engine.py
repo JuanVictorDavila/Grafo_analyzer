@@ -289,11 +289,19 @@ def analyze_signatures(questioned_path, sample_paths, log_callback=print):
     log_callback(f"[INFO] Processando a Assinatura Questionada...")
     try:
         q_prep = preprocess_signature(questioned_path)
+    except Exception as e:
+        return {"error": f"Erro na questionada (preprocess): {str(e)}"}
+        
+    try:
         q_img = q_prep["bin"]
         q_features = extract_features(q_img)
+    except Exception as e:
+        return {"error": f"Erro na questionada (extract_features): {str(e)}"}
+        
+    try:
         q_morph = extract_graphotechnical_features(q_prep["orig"], q_img)
     except Exception as e:
-        return {"error": f"Erro na questionada: {str(e)}"}
+        return {"error": f"Erro na questionada (extract_graphotechnical_features): {str(e)}"}
     s_imgs = []; s_origs = []; s_reds = []; s_feats = []; s_morphs = []
     log_callback(f"[INFO] Extraindo geometria das amostras autênticas ({len(sample_paths)} encontradas)...")
     for idx, sp in enumerate(sample_paths):
