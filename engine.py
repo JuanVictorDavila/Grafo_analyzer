@@ -226,6 +226,10 @@ def get_grid_density(image, grid=(4, 4)):
     return np.array(densities)
 
 def extract_features(image):
+    # Garante tamanho fixo para HOG independente de versão do scikit-image
+    target_h, target_w = 400, 800
+    if image.shape[0] != target_h or image.shape[1] != target_w:
+        image = cv2.resize(image, (target_w, target_h), interpolation=cv2.INTER_AREA)
     hog_feats = hog(image, orientations=9, pixels_per_cell=(16, 16),
                     cells_per_block=(2, 2), block_norm='L2-Hys', visualize=False)
     orb = cv2.ORB_create(nfeatures=500)
@@ -255,13 +259,17 @@ def compare_signatures(img1, img2, features1, features2):
         o_score = min(len(good_matches) / max_possible * 4.0, 1.0)
     hog1 = features1["hog"]
     hog2 = features2["hog"]
+    # Trunca ao menor tamanho para compatibilidade entre versões do scikit-image
+    min_hog = min(len(hog1), len(hog2))
+    hog1, hog2 = hog1[:min_hog], hog2[:min_hog]
     dot_product = np.dot(hog1, hog2)
     norm_a = np.linalg.norm(hog1)
     norm_b = np.linalg.norm(hog2)
     h_score = 0 if (norm_a == 0 or norm_b == 0) else max(0, dot_product / (norm_a * norm_b))
     grid1 = features1["grid"]
     grid2 = features2["grid"]
-    mae = np.mean(np.abs(grid1 - grid2))
+    min_grid = min(len(grid1), len(grid2))
+    mae = np.mean(np.abs(grid1[:min_grid] - grid2[:min_grid]))
     g_score = max(0, 1.0 - (mae * 4))
     block_size = 100
     h_b, w_b = img1.shape
