@@ -58,144 +58,492 @@ def preprocess_signature(image_path, target_size=(800, 400)):
     return {"bin": resized_bin, "orig": resized_orig, "red": resized_red}
 
 def extract_graphotechnical_features(img_color, img_bin):
-    mask = img_bin > 127
-    ink_pixels = img_color[mask]
+    try:
+        mask = img_bin > 127
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        ink_pixels = img_color[mask]
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
     if len(ink_pixels) == 0:
-        median_bgr = np.array([0, 0, 0], dtype=np.uint8)
+        try:
+            median_bgr = np.array([0, 0, 0], dtype=np.uint8)
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
     else:
-        median_bgr = np.median(ink_pixels, axis=0).astype(np.uint8)
-    bgr_1x1 = np.uint8([[median_bgr]])
-    lab_1x1 = cv2.cvtColor(bgr_1x1, cv2.COLOR_BGR2LAB)
-    median_lab = lab_1x1[0][0].astype(np.float32)
-    contours, _ = cv2.findContours(img_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    total_length = 0
-    total_vertices = 0
-    hesitation_img = img_color.copy()
+        try:
+            median_bgr = np.median(ink_pixels, axis=0).astype(np.uint8)
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        bgr_1x1 = np.uint8([[median_bgr]])
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        lab_1x1 = cv2.cvtColor(bgr_1x1, cv2.COLOR_BGR2LAB)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        median_lab = lab_1x1[0][0].astype(np.float32)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        contours, _ = cv2.findContours(img_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        total_length = 0
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        total_vertices = 0
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        hesitation_img = img_color.copy()
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
     for c in contours:
-        length = cv2.arcLength(c, True)
+        try:
+            length = cv2.arcLength(c, True)
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
         if length > 30:
-            total_length += length
-            epsilon = 0.005 * length
-            approx = cv2.approxPolyDP(c, epsilon, True)
-            total_vertices += len(approx)
+            try:
+                total_length += length
+            except Exception as _e:
+                raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+            try:
+                epsilon = 0.005 * length
+            except Exception as _e:
+                raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+            try:
+                approx = cv2.approxPolyDP(c, epsilon, True)
+            except Exception as _e:
+                raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+            try:
+                total_vertices += len(approx)
+            except Exception as _e:
+                raise Exception(f"Line failed: '{line.strip()}' - {_e}")
             for pt in approx:
-                px, py = pt[0]
-                cv2.circle(hesitation_img, (px, py), 2, (0, 0, 255), -1)
-    tremor_index = (total_vertices / total_length * 100) if total_length > 0 else 0
-    dist_transform = cv2.distanceTransform(img_bin, cv2.DIST_L2, 5)
-    mean_thickness = np.mean(dist_transform[mask]) * 2 if np.sum(mask) > 0 else 0
+                try:
+                    px, py = pt[0]
+                except Exception as _e:
+                    raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+                try:
+                    cv2.circle(hesitation_img, (px, py), 2, (0, 0, 255), -1)
+                except Exception as _e:
+                    raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        tremor_index = (total_vertices / total_length * 100) if total_length > 0 else 0
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        dist_transform = cv2.distanceTransform(img_bin, cv2.DIST_L2, 5)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        mean_thickness = np.mean(dist_transform[mask]) * 2 if np.sum(mask) > 0 else 0
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
     if contours:
-        all_pts = np.vstack(contours)
-        x_g, y_g, w_g, h_g = cv2.boundingRect(all_pts)
-        aspect_ratio = h_g / float(w_g) if w_g > 0 else 0
+        try:
+            all_pts = np.vstack(contours)
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            x_g, y_g, w_g, h_g = cv2.boundingRect(all_pts)
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            aspect_ratio = h_g / float(w_g) if w_g > 0 else 0
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
     else:
-        aspect_ratio = 0
-    bottom_points = []
-    angles = []
-    rhythm_img = img_color.copy()
+        try:
+            aspect_ratio = 0
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        bottom_points = []
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        angles = []
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        rhythm_img = img_color.copy()
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
     for c in contours:
         if cv2.contourArea(c) > 30:
-            x, y, w, h = cv2.boundingRect(c)
-            bottom_points.append([x + w/2.0, y + h])
-            h_mm = h * 0.0846
-            cv2.rectangle(rhythm_img, (x, y), (x+w, y+h), (255, 100, 0), 1)
-            cv2.putText(rhythm_img, f"H:{h_mm:.1f}mm", (x, max(10, y - 5)), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (200, 50, 0), 1)
+            try:
+                x, y, w, h = cv2.boundingRect(c)
+            except Exception as _e:
+                raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+            try:
+                bottom_points.append([x + w/2.0, y + h])
+            except Exception as _e:
+                raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+            try:
+                h_mm = h * 0.0846
+            except Exception as _e:
+                raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+            try:
+                cv2.rectangle(rhythm_img, (x, y), (x+w, y+h), (255, 100, 0), 1)
+            except Exception as _e:
+                raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+            try:
+                cv2.putText(rhythm_img, f"H:{h_mm:.1f}mm", (x, max(10, y - 5)), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (200, 50, 0), 1)
+            except Exception as _e:
+                raise Exception(f"Line failed: '{line.strip()}' - {_e}")
             if len(c) >= 5:
                 try:
-                    (cx, cy), (MA, ma), angle = cv2.fitEllipse(c)
-                    angles.append(angle)
+                    try:
+                        (cx, cy), (MA, ma), angle = cv2.fitEllipse(c)
+                    except Exception as _e:
+                        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+                    try:
+                        angles.append(angle)
+                    except Exception as _e:
+                        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
                 except Exception:
-                    pass
+                    try:
+                        pass
+                    except Exception as _e:
+                        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
     if len(bottom_points) > 1:
-        pts = np.array(bottom_points, dtype=np.float32)
-        vx, vy, cx, cy = cv2.fitLine(pts, cv2.DIST_L2, 0, 0.01, 0.01)
-        baseline_slope = (vy[0] / vx[0]) if vx[0] != 0 else 0.0
-        baseline_angle = np.degrees(np.arctan(baseline_slope))
+        try:
+            pts = np.array(bottom_points, dtype=np.float32)
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            vx, vy, cx, cy = cv2.fitLine(pts, cv2.DIST_L2, 0, 0.01, 0.01)
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            baseline_slope = (vy[0] / vx[0]) if vx[0] != 0 else 0.0
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            baseline_angle = np.degrees(np.arctan(baseline_slope))
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
     else:
-        baseline_angle = 0.0
-    axial_angle = np.median(angles) if len(angles) > 0 else 0.0
-    total_area = np.sum(mask)
-    connectivity_score = (len(contours) / (float(total_area) + 1e-5)) * 10000
-    moments = cv2.moments(img_bin)
-    hu_moments = cv2.HuMoments(moments).flatten()
+        try:
+            baseline_angle = 0.0
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        axial_angle = np.median(angles) if len(angles) > 0 else 0.0
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        total_area = np.sum(mask)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        connectivity_score = (len(contours) / (float(total_area) + 1e-5)) * 10000
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        moments = cv2.moments(img_bin)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        hu_moments = cv2.HuMoments(moments).flatten()
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
     for i in range(7):
         if hu_moments[i] != 0:
-            hu_moments[i] = -1 * np.copysign(1.0, hu_moments[i]) * np.log10(abs(hu_moments[i]))
-    skel = skeletonize(img_bin > 127)
-    skel_uint8 = skel.astype(np.uint8)
-    kernel_nb = np.array([[1,1,1],[1,0,1],[1,1,1]], dtype=np.uint8)
-    neighbors = cv2.filter2D(skel_uint8, -1, kernel_nb, borderType=cv2.BORDER_CONSTANT)
-    endpoints_mask = (skel_uint8 == 1) & (neighbors == 1)
-    junctions_mask = (skel_uint8 == 1) & (neighbors > 2)
-    endpoints_count = np.sum(endpoints_mask)
-    junctions_count = np.sum(junctions_mask)
-    skel_img = img_color.copy()
-    skel_img = cv2.addWeighted(skel_img, 0.3, np.zeros(skel_img.shape, skel_img.dtype), 0, 0)
-    skel_img[skel] = [0, 255, 0]
-    ep_y, ep_x = np.where(endpoints_mask)
+            try:
+                hu_moments[i] = -1 * np.copysign(1.0, hu_moments[i]) * np.log10(abs(hu_moments[i]))
+            except Exception as _e:
+                raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        skel = skeletonize(img_bin > 127)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        skel_uint8 = skel.astype(np.uint8)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        kernel_nb = np.array([[1,1,1],[1,0,1],[1,1,1]], dtype=np.uint8)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        neighbors = cv2.filter2D(skel_uint8, -1, kernel_nb, borderType=cv2.BORDER_CONSTANT)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        endpoints_mask = (skel_uint8 == 1) & (neighbors == 1)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        junctions_mask = (skel_uint8 == 1) & (neighbors > 2)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        endpoints_count = np.sum(endpoints_mask)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        junctions_count = np.sum(junctions_mask)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        skel_img = img_color.copy()
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        skel_img = cv2.addWeighted(skel_img, 0.3, np.zeros(skel_img.shape, skel_img.dtype), 0, 0)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        skel_img[skel] = [0, 255, 0]
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        ep_y, ep_x = np.where(endpoints_mask)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
     for y, x in zip(ep_y, ep_x):
-        cv2.circle(skel_img, (x, y), 3, (0, 0, 255), -1)
-    jp_y, jp_x = np.where(junctions_mask)
+        try:
+            cv2.circle(skel_img, (x, y), 3, (0, 0, 255), -1)
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        jp_y, jp_x = np.where(junctions_mask)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
     for y, x in zip(jp_y, jp_x):
-        cv2.circle(skel_img, (x, y), 3, (255, 0, 0), -1)
-    gray = cv2.cvtColor(img_color, cv2.COLOR_BGR2GRAY)
-    radius = 1
-    n_points = 8 * radius
-    lbp = local_binary_pattern(gray, n_points, radius, method="uniform")
-    lbp_img = cv2.normalize(lbp, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-    lbp_img = cv2.applyColorMap(lbp_img, cv2.COLORMAP_JET)
-    lbp_hist, _ = np.histogram(lbp.ravel(), bins=np.arange(0, n_points + 3), range=(0, n_points + 2))
-    lbp_hist = lbp_hist.astype("float")
-    lbp_hist /= (lbp_hist.sum() + 1e-6)
-    f_transform = np.fft.fft2(gray)
-    f_shift = np.fft.fftshift(f_transform)
-    magnitude_spectrum = 20 * np.log(np.abs(f_shift) + 1e-6)
-    fft_img = cv2.normalize(magnitude_spectrum, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-    fft_img = cv2.applyColorMap(fft_img, cv2.COLORMAP_MAGMA)
-    h_gray, w_gray = gray.shape
-    cy_f, cx_f = h_gray // 2, w_gray // 2
-    y_idx, x_idx = np.ogrid[:h_gray, :w_gray]
-    mask_area = (x_idx - cx_f)**2 + (y_idx - cy_f)**2 <= 30**2
-    low_energy = np.sum(np.abs(f_shift[mask_area]))
-    total_energy = np.sum(np.abs(f_shift))
-    high_energy = total_energy - low_energy
-    fft_energy_ratio = high_energy / (low_energy + 1e-6)
-    fourier_desc = np.zeros(32, dtype=np.float64)
-    main_contour = None
+        try:
+            cv2.circle(skel_img, (x, y), 3, (255, 0, 0), -1)
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        gray = cv2.cvtColor(img_color, cv2.COLOR_BGR2GRAY)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        radius = 1
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        n_points = 8 * radius
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        lbp = local_binary_pattern(gray, n_points, radius, method="uniform")
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        lbp_img = cv2.normalize(lbp, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        lbp_img = cv2.applyColorMap(lbp_img, cv2.COLORMAP_JET)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        lbp_hist, _ = np.histogram(lbp.ravel(), bins=np.arange(0, n_points + 3), range=(0, n_points + 2))
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        lbp_hist = lbp_hist.astype("float")
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        lbp_hist /= (lbp_hist.sum() + 1e-6)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        f_transform = np.fft.fft2(gray)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        f_shift = np.fft.fftshift(f_transform)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        magnitude_spectrum = 20 * np.log(np.abs(f_shift) + 1e-6)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        fft_img = cv2.normalize(magnitude_spectrum, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        fft_img = cv2.applyColorMap(fft_img, cv2.COLORMAP_MAGMA)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        h_gray, w_gray = gray.shape
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        cy_f, cx_f = h_gray // 2, w_gray // 2
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        y_idx, x_idx = np.ogrid[:h_gray, :w_gray]
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        mask_area = (x_idx - cx_f)**2 + (y_idx - cy_f)**2 <= 30**2
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        low_energy = np.sum(np.abs(f_shift[mask_area]))
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        total_energy = np.sum(np.abs(f_shift))
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        high_energy = total_energy - low_energy
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        fft_energy_ratio = high_energy / (low_energy + 1e-6)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        fourier_desc = np.zeros(32, dtype=np.float64)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        main_contour = None
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
     if contours:
-        main_contour = max(contours, key=cv2.contourArea)
+        try:
+            main_contour = max(contours, key=cv2.contourArea)
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
     if main_contour is not None and len(main_contour) >= 8:
-        contour_complex = main_contour[:, 0, 0] + 1j * main_contour[:, 0, 1]
-        fourier_coeffs = np.fft.fft(contour_complex)
+        try:
+            contour_complex = main_contour[:, 0, 0] + 1j * main_contour[:, 0, 1]
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            fourier_coeffs = np.fft.fft(contour_complex)
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
         if abs(fourier_coeffs[1]) > 1e-6:
-            fourier_coeffs /= abs(fourier_coeffs[1])
-        n_desc = min(32, len(fourier_coeffs) // 2)
-        fourier_desc[:n_desc] = np.abs(fourier_coeffs[1:n_desc+1])
-    gray_flat = gray.ravel()
-    hist_gray, _ = np.histogram(gray_flat, bins=256, range=(0, 256))
-    hist_gray = hist_gray.astype(float)
-    hist_gray /= (hist_gray.sum() + 1e-6)
-    pixel_entropy = float(shannon_entropy(hist_gray + 1e-12))
-    sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
-    sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
-    grad_mag = np.sqrt(sobelx**2 + sobely**2).ravel()
-    hist_grad, _ = np.histogram(grad_mag, bins=64)
-    hist_grad = hist_grad.astype(float)
-    hist_grad /= (hist_grad.sum() + 1e-6)
-    grad_entropy = float(shannon_entropy(hist_grad + 1e-12))
+            try:
+                fourier_coeffs /= abs(fourier_coeffs[1])
+            except Exception as _e:
+                raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            n_desc = min(32, len(fourier_coeffs) // 2)
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            fourier_desc[:n_desc] = np.abs(fourier_coeffs[1:n_desc+1])
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        gray_flat = gray.ravel()
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        hist_gray, _ = np.histogram(gray_flat, bins=256, range=(0, 256))
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        hist_gray = hist_gray.astype(float)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        hist_gray /= (hist_gray.sum() + 1e-6)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        pixel_entropy = float(shannon_entropy(hist_gray + 1e-12))
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        grad_mag = np.sqrt(sobelx**2 + sobely**2).ravel()
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        hist_grad, _ = np.histogram(grad_mag, bins=64)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        hist_grad = hist_grad.astype(float)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        hist_grad /= (hist_grad.sum() + 1e-6)
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        grad_entropy = float(shannon_entropy(hist_grad + 1e-12))
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
     return {
-        "color_bgr": median_bgr, "color_lab": median_lab,
-        "tremor_index": tremor_index, "thickness": mean_thickness,
-        "aspect_ratio": aspect_ratio, "baseline_angle": baseline_angle,
-        "axial_angle": axial_angle, "connectivity": connectivity_score,
-        "rhythm_img": rhythm_img, "hesitation_img": hesitation_img,
-        "hu_moments": hu_moments, "endpoints": int(endpoints_count),
-        "junctions": int(junctions_count), "skel_img": skel_img,
-        "fft_img": fft_img, "fft_ratio": fft_energy_ratio,
-        "lbp_img": lbp_img, "lbp_hist": lbp_hist,
-        "fourier_desc": fourier_desc, "pixel_entropy": pixel_entropy,
-        "grad_entropy": grad_entropy
-    }
+        try:
+            "color_bgr": median_bgr, "color_lab": median_lab,
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            "tremor_index": tremor_index, "thickness": mean_thickness,
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            "aspect_ratio": aspect_ratio, "baseline_angle": baseline_angle,
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            "axial_angle": axial_angle, "connectivity": connectivity_score,
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            "rhythm_img": rhythm_img, "hesitation_img": hesitation_img,
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            "hu_moments": hu_moments, "endpoints": int(endpoints_count),
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            "junctions": int(junctions_count), "skel_img": skel_img,
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            "fft_img": fft_img, "fft_ratio": fft_energy_ratio,
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            "lbp_img": lbp_img, "lbp_hist": lbp_hist,
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            "fourier_desc": fourier_desc, "pixel_entropy": pixel_entropy,
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+        try:
+            "grad_entropy": grad_entropy
+        except Exception as _e:
+            raise Exception(f"Line failed: '{line.strip()}' - {_e}")
+    try:
+        }
+    except Exception as _e:
+        raise Exception(f"Line failed: '{line.strip()}' - {_e}")
 
 def align_images(img_target, img_source):
     warp_mode = cv2.MOTION_TRANSLATION
