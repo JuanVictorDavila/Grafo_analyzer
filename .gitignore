@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+env/
+
+# Arquivos locais/temporários
+Relatorio/
+Relatorio_Test/
+*.pdf
+*.exe
+*.spec
+
+# Cópias de desenvolvimento
+main copy*.py
+main copy*.py
+
+# Logs
+error.txt
+output.txt
+
+# Testes locais (imagens de teste)
+test_sig*.png
+test_grafo.py
+test_same.py
